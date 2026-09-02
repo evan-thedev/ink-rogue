@@ -710,16 +710,16 @@
                 this.x = x;
                 this.y = y;
                 this.type = type;
-                this.hp = type === 'basic' ? 30 : type === 'tough' ? 60 : 40;
+                this.hp = type === 'basic' ? 25 : type === 'tough' ? 50 : 30;
                 this.maxHp = this.hp;
-                this.speed = type === 'basic' ? 0.8 : type === 'tough' ? 0.5 : 1.0;
-                this.damage = type === 'basic' ? 5 : type === 'tough' ? 8 : 6;
+                this.speed = type === 'basic' ? 0.6 : type === 'tough' ? 0.4 : 0.8;
+                this.damage = type === 'basic' ? 3 : type === 'tough' ? 5 : 4;
                 this.size = type === 'tough' ? 20 : 14;
                 this.xpValue = type === 'basic' ? 25 : type === 'tough' ? 60 : 50;
                 this.stunUntil = 0;
                 this.slowedUntil = 0;
                 this.lastAttack = 0;
-                this.attackCooldown = type === 'fast' ? 1500 : 2000;
+                this.attackCooldown = type === 'fast' ? 3000 : 4000;
             }
             
             update() {
@@ -837,17 +837,19 @@
             game.items = [];
             game.roomCleared = false;
             
-            const enemyCount = 1 + game.room;
+            const enemyCount = game.room <= 2 ? game.room : 2 + (game.room - 2);
             for (let i = 0; i < enemyCount; i++) {
-                const types = game.room === 1 ? ['basic', 'basic'] : ['basic', 'basic', 'tough', 'fast'];
+                const types = game.room === 1 ? ['basic'] : game.room === 2 ? ['basic', 'basic'] : ['basic', 'basic', 'tough', 'fast'];
                 const type = types[Math.floor(Math.random() * types.length)];
                 
                 let x, y, dist;
+                let attempts = 0;
                 do {
                     x = Math.random() * (GAME_WIDTH - 200) + 100;
                     y = Math.random() * (GAME_HEIGHT - 200) + 100;
                     dist = Math.sqrt((x - game.player.x) ** 2 + (y - game.player.y) ** 2);
-                } while (dist < 250);
+                    attempts++;
+                } while (dist < 300 && attempts < 50);
                 
                 game.enemies.push(new Enemy(x, y, type));
             }
