@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ink Rogue</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Lora:wght@400;600&family=Inconsolata:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --cream: #F5F1E8;
+            --ink: #2B2420;
+            --accent: #8B4513;
+            --paper: #FFF9F0;
+            --shadow: rgba(43, 36, 32, 0.15);
+        }
+        
+        body {
+            font-family: 'Lora', serif;
+            background: var(--cream);
+            color: var(--ink);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        #game-container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--paper);
+            border: 3px solid var(--ink);
+            box-shadow: 8px 8px 0 var(--shadow);
+            padding: 20px;
+        }
+        
+        h1 {
+            font-family: 'Crimson Text', serif;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        
+        #class-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .class-card {
+            border: 2px solid var(--ink);
+            padding: 20px;
+            cursor: pointer;
+            background: var(--paper);
+            transition: all 0.2s;
+        }
+        
+        .class-card:hover {
+            background: var(--cream);
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 var(--shadow);
+        }
+        
+        .class-card h3 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .class-card p {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .stat {
+            font-family: 'Inconsolata', monospace;
+            font-size: 0.8rem;
+            margin: 3px 0;
+        }
+        
+        #game-screen {
+            display: none;
+        }
+        
+        #canvas {
+            width: 100%;
+            max-width: 800px;
+            height: 500px;
+            border: 2px solid var(--ink);
+            display: block;
+            margin: 0 auto 15px;
+            background: var(--paper);
+            image-rendering: pixelated;
+        }
+        
+        #hud {
+            font-family: 'Inconsolata', monospace;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            background: var(--cream);
+        }
+        
+        .hud-item {
+            font-size: 0.9rem;
+        }
+        
+        .hud-label {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        #skills-display {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        
+        .skill-badge {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+        
+        #controls {
+            font-family: 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            background: var(--cream);
+            margin-bottom: 15px;
+        }
+        
+        #mobile-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .mobile-btn {
+            font-family: 'Inconsolata', monospace;
+            padding: 15px;
+            border: 2px solid var(--ink);
+            background: var(--paper);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.1s;
+        }
+        
+        .mobile-btn:active {
+            background: var(--accent);
+            color: var(--paper);
+        }
+        
+        .mobile-btn.wide {
+            grid-column: span 3;
+        }
+        
+        #level-up-modal, #game-over-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(43, 36, 32, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: var(--paper);
+            border: 3px solid var(--ink);
+            box-shadow: 8px 8px 0 var(--shadow);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-content h2 {
+            font-family: 'Crimson Text', serif;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .skill-option {
+            border: 2px solid var(--ink);
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            background: var(--paper);
+        }
+        
+        .skill-option:hover {
+            background: var(--cream);
+        }
+        
+        .skill-option h4 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        button {
+            font-family: 'Inconsolata', monospace;
+            padding: 12px 24px;
+            border: 2px solid var(--ink);
+            background: var(--paper);
+            cursor: pointer;
+            font-size: 1rem;
+            display: block;
+            margin: 20px auto 0;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: var(--accent);
+            color: var(--paper);
+        }
+        
+        .message {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid var(--ink);
+            background: var(--cream);
+            font-family: 'Inconsolata', monospace;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            #canvas { height: 350px; }
+            #class-select { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="title-screen">
+            <h1>Ink Rogue</h1>
+            <p class="subtitle">A Wizard's Tale</p>
+            
+            <div class="message">
+                Choose your adventurer. Each class wields different weapons and skills.
+            </div>
+            
+            <div id="class-select">
+                <div class="class-card" data-class="wizard">
+                    <h3>Wizard</h3>
+                    <p>Master of arcane arts. Frail but devastating.</p>
+                    <div class="stat">HP: 60</div>
+                    <div class="stat">Speed: 2.5</div>
+                    <div class="stat">Weapon: Magic Bolt</div>
+                    <div class="stat">Skill: Fireball</div>
+                </div>
+                
+                <div class="class-card" data-class="knight">
+                    <h3>Knight</h3>
+                    <p>Armored defender. Sturdy and reliable.</p>
+                    <div class="stat">HP: 120</div>
+                    <div class="stat">Speed: 1.8</div>
+                    <div class="stat">Weapon: Longsword</div>
+                    <div class="stat">Skill: Shield Bash</div>
+                </div>
+                
+                <div class="class-card" data-class="fighter">
+                    <h3>Fighter</h3>
+                    <p>Brutal warrior. Balanced offense and defense.</p>
+                    <div class="stat">HP: 100</div>
+                    <div class="stat">Speed: 2.2</div>
+                    <div class="stat">Weapon: Battle Axe</div>
+                    <div class="stat">Skill: Berserker</div>
+                </div>
+                
+                <div class="class-card" data-class="rogue">
+                    <h3>Rogue</h3>
+                    <p>Swift assassin. Fast and evasive.</p>
+                    <div class="stat">HP: 80</div>
+                    <div class="stat">Speed: 3.0</div>
+                    <div class="stat">Weapon: Dual Daggers</div>
+                    <div class="stat">Skill: Shadow Step</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="game-screen">
+            <div id="hud">
+                <div class="hud-item"><span class="hud-label">Class:</span> <span id="hud-class"></span></div>
+                <div class="hud-item"><span class="hud-label">HP:</span> <span id="hud-hp"></span></div>
+                <div class="hud-item"><span class="hud-label">Level:</span> <span id="hud-level"></span></div>
+                <div class="hud-item"><span class="hud-label">XP:</span> <span id="hud-xp"></span></div>
+                <div class="hud-item"><span class="hud-label">Weapon:</span> <span id="hud-weapon"></span></div>
+                <div class="hud-item" style="grid-column: span 2;">
+                    <span class="hud-label">Skills:</span>
+                    <div id="skills-display"></div>
+                </div>
+            </div>
+            
+            <canvas id="canvas" width="800" height="500"></canvas>
+            
+            <div id="controls">
+                WASD or Arrow Keys: Move | SPACE: Attack | 1-5: Use Skill
+            </div>
+            
+            <div id="mobile-controls">
+                <button class="mobile-btn" data-dir="up">↑</button>
+                <button class="mobile-btn" data-dir="left">←</button>
+                <button class="mobile-btn" data-dir="down">↓</button>
+                <button class="mobile-btn" data-dir="right">→</button>
+                <button class="mobile-btn wide" data-action="attack">ATTACK</button>
+            </div>
+        </div>
+        
+        <div id="level-up-modal">
+            <div class="modal-content">
+                <h2>Level Up!</h2>
+                <p class="message">Choose a new skill to enhance your abilities.</p>
+                <div id="skill-options"></div>
+            </div>
+        </div>
+        
+        <div id="game-over-modal">
+            <div class="modal-content">
+                <h2 id="game-over-title">Victory!</h2>
+                <p id="game-over-text" class="message"></p>
+                <button id="restart-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const TILE_SIZE = 32;
+        const GAME_WIDTH = 800;
+        const GAME_HEIGHT = 500;
+        
+        const classData = {
+            wizard: {
+                name: 'Wizard',
+                hp: 100,
+                maxHp: 100,
+                speed: 3.0,
+                weapon: { name: 'Magic Bolt', damage: 18, range: 180 },
+                startSkill: { name: 'Fireball', damage: 25, effect: 'Random explosion radius' }
+            },
+            knight: {
+                name: 'Knight',
+                hp: 150,
+                maxHp: 150,
+                speed: 2.5,
+                weapon: { name: 'Longsword', damage: 22, range: 50 },
+                startSkill: { name: 'Shield Bash', damage: 15, effect: 'Stun chance varies' }
+            },
+            fighter: {
+                name: 'Fighter',
+                hp: 130,
+                maxHp: 130,
+                speed: 2.7,
+                weapon: { name: 'Battle Axe', damage: 28, range: 45 },
+                startSkill: { name: 'Berserker', damage: 0, effect: 'Random damage boost' }
+            },
+            rogue: {
+                name: 'Rogue',
+                hp: 110,
+                maxHp: 110,
+                speed: 3.5,
+                weapon: { name: 'Dual Daggers', damage: 15, range: 40 },
+                startSkill: { name: 'Shadow Step', damage: 0, effect: 'Random teleport distance' }
+            }
+        };
+        
+        const skillPool = [
+            { name: 'Vampiric Strike', damage: 18, effect: 'Heal 20-60% damage dealt' },
+            { name: 'Frost Nova', damage: 20, effect: 'Slow radius: 50-150px' },
+            { name: 'Chain Lightning', damage: 15, effect: 'Hits 1-4 enemies' },
+            { name: 'Poison Cloud', damage: 8, effect: 'Duration: 2-6 seconds' },
+            { name: 'War Cry', damage: 0, effect: 'Damage boost: 1.2x-2x for 3-8s' },
+            { name: 'Backstab', damage: 30, effect: 'Crit chance: 30-90%' },
+            { name: 'Whirlwind', damage: 22, effect: 'Spin radius: 40-100px' },
+            { name: 'Divine Shield', damage: 0, effect: 'Block: 20-80% for 3-7s' },
+            { name: 'Meteor Strike', damage: 40, effect: 'Cast time: 0.5-2s' },
+            { name: 'Life Drain', damage: 10, effect: 'Steal 15-50 HP' },
+            { name: 'Smoke Bomb', damage: 0, effect: 'Invisibility: 2-5s' },
+            { name: 'Thunder Clap', damage: 28, effect: 'Stun duration: 0.5-2.5s' }
+        ];
+        
+        const weaponPool = [
+            { name: 'Iron Sword', damage: 18, range: 45 },
+            { name: 'Enchanted Staff', damage: 20, range: 200 },
+            { name: 'Crossbow', damage: 22, range: 250 },
+            { name: 'War Hammer', damage: 30, range: 42 },
+            { name: 'Mystic Bow', damage: 24, range: 280 },
+            { name: 'Flaming Blade', damage: 28, range: 48 }
+        ];
+        
+        let game = {
+            state: 'title',
+            player: null,
+            enemies: [],
+            items: [],
+            projectiles: [],
+            particles: [],
+            room: 0,
+            maxRooms: 5,
+            roomCleared: false,
+            keys: {},
+            lastSkillUse: 0,
+            skillCooldown: 1000,
+            attackCooldown: 500,
+            lastAttack: 0
+        };
+        
+        class Player {
+            constructor(classType) {
+                const data = classData[classType];
+                this.class = data.name;
+                this.x = GAME_WIDTH / 2;
+                this.y = GAME_HEIGHT / 2;
+                this.hp = data.hp;
+                this.maxHp = data.maxHp;
+                this.speed = data.speed;
+                this.weapon = { ...data.weapon };
+                this.skills = [{ ...data.startSkill }];
+                this.level = 1;
+                this.xp = 0;
+                this.xpToLevel = 100;
+                this.size = 16;
+                this.vx = 0;
+                this.vy = 0;
+                this.facingX = 1;
+                this.facingY = 0;
+                this.activeEffects = [];
+            }
+            
+            update() {
+                let dx = 0, dy = 0;
+                if (game.keys['w'] || game.keys['ArrowUp']) dy -= 1;
+                if (game.keys['s'] || game.keys['ArrowDown']) dy += 1;
+                if (game.keys['a'] || game.keys['ArrowLeft']) dx -= 1;
+                if (game.keys['d'] || game.keys['ArrowRight']) dx += 1;
+                
+                if (dx !== 0 || dy !== 0) {
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    dx /= len;
+                    dy /= len;
+                    this.facingX = dx;
+                    this.facingY = dy;
+                }
+                
+                this.x += dx * this.speed;
+                this.y += dy * this.speed;
+                
+                this.x = Math.max(this.size, Math.min(GAME_WIDTH - this.size, this.x));
+                this.y = Math.max(this.size, Math.min(GAME_HEIGHT - this.size, this.y));
+                
+                this.activeEffects = this.activeEffects.filter(e => Date.now() < e.endTime);
+            }
+            
+            attack() {
+                if (Date.now() - game.lastAttack < game.attackCooldown) return;
+                game.lastAttack = Date.now();
+                
+                const nearest = findNearestEnemy(this.x, this.y);
+                if (!nearest) return;
+                
+                const dx = nearest.x - this.x;
+                const dy = nearest.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist <= this.weapon.range) {
+                    let damage = this.weapon.damage;
+                    const boost = this.activeEffects.find(e => e.type === 'damageBoost');
+                    if (boost) damage *= boost.value;
+                    
+                    nearest.hp -= damage;
+                    createParticles(nearest.x, nearest.y, '#8B4513', 5);
+                }
+            }
+            
+            useSkill(index) {
+                if (Date.now() - game.lastSkillUse < game.skillCooldown) return;
+                if (!this.skills[index]) return;
+                game.lastSkillUse = Date.now();
+                
+                const skill = this.skills[index];
+                
+                if (skill.name === 'Fireball') {
+                    const radius = 30 + Math.random() * 70;
+                    this.castFireball(radius);
+                } else if (skill.name === 'Shield Bash') {
+                    const stunChance = 0.3 + Math.random() * 0.6;
+                    this.castShieldBash(stunChance);
+                } else if (skill.name === 'Berserker') {
+                    const boost = 1.3 + Math.random() * 0.9;
+                    const duration = 3000 + Math.random() * 4000;
+                    this.activeEffects.push({ type: 'damageBoost', value: boost, endTime: Date.now() + duration });
+                } else if (skill.name === 'Shadow Step') {
+                    const dist = 50 + Math.random() * 100;
+                    this.x += this.facingX * dist;
+                    this.y += this.facingY * dist;
+                    this.x = Math.max(this.size, Math.min(GAME_WIDTH - this.size, this.x));
+                    this.y = Math.max(this.size, Math.min(GAME_HEIGHT - this.size, this.y));
+                } else if (skill.name === 'Vampiric Strike') {
+                    const healPercent = 0.2 + Math.random() * 0.4;
+                    this.castVampiricStrike(healPercent);
+                } else if (skill.name === 'Frost Nova') {
+                    const radius = 50 + Math.random() * 100;
+                    this.castFrostNova(radius);
+                } else if (skill.name === 'Chain Lightning') {
+                    const targets = 1 + Math.floor(Math.random() * 4);
+                    this.castChainLightning(targets);
+                } else if (skill.name === 'Poison Cloud') {
+                    const duration = 2000 + Math.random() * 4000;
+                    this.castPoisonCloud(duration);
+                } else if (skill.name === 'War Cry') {
+                    const boost = 1.2 + Math.random() * 0.8;
+                    const duration = 3000 + Math.random() * 5000;
+                    this.activeEffects.push({ type: 'damageBoost', value: boost, endTime: Date.now() + duration });
+                } else if (skill.name === 'Backstab') {
+                    const critChance = 0.3 + Math.random() * 0.6;
+                    this.castBackstab(critChance);
+                } else if (skill.name === 'Whirlwind') {
+                    const radius = 40 + Math.random() * 60;
+                    this.castWhirlwind(radius);
+                } else if (skill.name === 'Divine Shield') {
+                    const block = 0.2 + Math.random() * 0.6;
+                    const duration = 3000 + Math.random() * 4000;
+                    this.activeEffects.push({ type: 'block', value: block, endTime: Date.now() + duration });
+                } else if (skill.name === 'Meteor Strike') {
+                    this.castMeteor();
+                } else if (skill.name === 'Life Drain') {
+                    const steal = 15 + Math.random() * 35;
+                    this.castLifeDrain(steal);
+                } else if (skill.name === 'Smoke Bomb') {
+                    const duration = 2000 + Math.random() * 3000;
+                    this.activeEffects.push({ type: 'invisible', endTime: Date.now() + duration });
+                } else if (skill.name === 'Thunder Clap') {
+                    const stunDuration = 500 + Math.random() * 2000;
+                    this.castThunderClap(stunDuration);
+                }
+            }
+            
+            castFireball(radius) {
+                game.enemies.forEach(e => {
+                    const dist = Math.sqrt((e.x - this.x) ** 2 + (e.y - this.y) ** 2);
+                    if (dist <= radius) e.hp -= 25;
+                });
+                createParticles(this.x, this.y, '#FF4500', 20);
+            }
+            
+            castShieldBash(stunChance) {
+                const nearest = findNearestEnemy(this.x, this.y);
+                if (nearest && Math.random() < stunChance) {
+                    nearest.stunUntil = Date.now() + 1500;
+                    nearest.hp -= 15;
+                }
+            }
+            
+            castVampiricStrike(healPercent) {
+                const nearest = findNearestEnemy(this.x, this.y);
+                if (nearest) {
+                    const damage = 18;
+                    nearest.hp -= damage;
+                    this.hp = Math.min(this.maxHp, this.hp + damage * healPercent);
+                }
+            }
+            
+            castFrostNova(radius) {
+                game.enemies.forEach(e => {
+                    const dist = Math.sqrt((e.x - this.x) ** 2 + (e.y - this.y) ** 2);
+                    if (dist <= radius) {
+                        e.hp -= 20;
+                        e.slowedUntil = Date.now() + 3000;
+                    }
+                });
+            }
+            
+            castChainLightning(targets) {
+                let hit = 0;
+                game.enemies.slice().sort((a, b) => {
+                    const dista = Math.sqrt((a.x - this.x) ** 2 + (a.y - this.y) ** 2);
+                    const distb = Math.sqrt((b.x - this.x) ** 2 + (b.y - this.y) ** 2);
+                    return dista - distb;
+                }).forEach(e => {
+                    if (hit < targets) {
+                        e.hp -= 15;
+                        hit++;
+                    }
+                });
+            }
+            
+            castPoisonCloud(duration) {
+                const cloudEnd = Date.now() + duration;
+                const interval = setInterval(() => {
+                    if (Date.now() > cloudEnd) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    game.enemies.forEach(e => {
+                        const dist = Math.sqrt((e.x - this.x) ** 2 + (e.y - this.y) ** 2);
+                        if (dist <= 80) e.hp -= 2;
+                    });
+                }, 500);
+            }
+            
+            castBackstab(critChance) {
+                const nearest = findNearestEnemy(this.x, this.y);
+                if (nearest) {
+                    const damage = Math.random() < critChance ? 60 : 30;
+                    nearest.hp -= damage;
+                }
+            }
+            
+            castWhirlwind(radius) {
+                game.enemies.forEach(e => {
+                    const dist = Math.sqrt((e.x - this.x) ** 2 + (e.y - this.y) ** 2);
+                    if (dist <= radius) e.hp -= 22;
+                });
+            }
+            
+            castMeteor() {
+                setTimeout(() => {
+                    game.enemies.forEach(e => e.hp -= 40);
+                    createParticles(GAME_WIDTH / 2, GAME_HEIGHT / 2, '#FF6347', 30);
+                }, 500 + Math.random() * 1500);
+            }
+            
+            castLifeDrain(steal) {
+                const nearest = findNearestEnemy(this.x, this.y);
+                if (nearest) {
+                    nearest.hp -= 10;
+                    this.hp = Math.min(this.maxHp, this.hp + steal);
+                }
+            }
+            
+            castThunderClap(stunDuration) {
+                game.enemies.forEach(e => {
+                    const dist = Math.sqrt((e.x - this.x) ** 2 + (e.y - this.y) ** 2);
+                    if (dist <= 100) {
+                        e.hp -= 28;
+                        e.stunUntil = Date.now() + stunDuration;
+                    }
+                });
+            }
+            
+            gainXP(amount) {
+                this.xp += amount;
+                if (this.xp >= this.xpToLevel) {
+                    this.levelUp();
+                }
+            }
+            
+            levelUp() {
+                this.level++;
+                this.xp -= this.xpToLevel;
+                this.xpToLevel = Math.floor(this.xpToLevel * 1.5);
+                this.maxHp += 10;
+                this.hp = this.maxHp;
+                showLevelUpModal();
+            }
+            
+            draw() {
+                ctx.fillStyle = '#2B2420';
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(this.x - this.size/2 + 2, this.y - this.size/2 + 2, this.size - 4, this.size - 4);
+                
+                ctx.strokeStyle = '#2B2420';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + this.facingX * 12, this.y + this.facingY * 12);
+                ctx.stroke();
+            }
+        }
+        
+        class Enemy {
+            constructor(x, y, type = 'basic') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.hp = type === 'basic' ? 25 : type === 'tough' ? 50 : 30;
+                this.maxHp = this.hp;
+                this.speed = type === 'basic' ? 0.6 : type === 'tough' ? 0.4 : 0.8;
+                this.damage = type === 'basic' ? 3 : type === 'tough' ? 5 : 4;
+                this.size = type === 'tough' ? 20 : 14;
+                this.xpValue = type === 'basic' ? 25 : type === 'tough' ? 60 : 50;
+                this.stunUntil = 0;
+                this.slowedUntil = 0;
+                this.lastAttack = 0;
+                this.attackCooldown = type === 'fast' ? 3000 : 4000;
+            }
+            
+            update() {
+                if (Date.now() < this.stunUntil) return;
+                
+                const dx = game.player.x - this.x;
+                const dy = game.player.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 20) {
+                    let speed = this.speed;
+                    if (Date.now() < this.slowedUntil) speed *= 0.5;
+                    
+                    this.x += (dx / dist) * speed;
+                    this.y += (dy / dist) * speed;
+                }
+                
+                if (dist < 25 && Date.now() - this.lastAttack > this.attackCooldown) {
+                    const block = game.player.activeEffects.find(e => e.type === 'block');
+                    const damage = block ? this.damage * (1 - block.value) : this.damage;
+                    game.player.hp -= damage;
+                    this.lastAttack = Date.now();
+                }
+            }
+            
+            draw() {
+                ctx.fillStyle = this.type === 'tough' ? '#4B3621' : this.type === 'fast' ? '#6B4423' : '#5B3621';
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                
+                const hpPercent = this.hp / this.maxHp;
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2 - 5, this.size * hpPercent, 2);
+            }
+        }
+        
+        class Item {
+            constructor(x, y, type, data) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.data = data;
+                this.size = 12;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.type === 'weapon' ? '#8B4513' : '#2B2420';
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                ctx.fillStyle = '#F5F1E8';
+                ctx.fillRect(this.x - this.size/2 + 2, this.y - this.size/2 + 2, this.size - 4, this.size - 4);
+            }
+        }
+        
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.life = 30;
+                this.color = color;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 3, 3);
+            }
+        }
+        
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                game.particles.push(new Particle(x, y, color));
+            }
+        }
+        
+        function findNearestEnemy(x, y) {
+            let nearest = null;
+            let minDist = Infinity;
+            game.enemies.forEach(e => {
+                const dist = Math.sqrt((e.x - x) ** 2 + (e.y - y) ** 2);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = e;
+                }
+            });
+            return nearest;
+        }
+        
+        function startGame(classType) {
+            game.player = new Player(classType);
+            game.enemies = [];
+            game.items = [];
+            game.projectiles = [];
+            game.particles = [];
+            game.room = 1;
+            game.roomCleared = false;
+            game.state = 'playing';
+            
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('game-over-modal').style.display = 'none';
+            
+            spawnRoom();
+            updateHUD();
+            gameLoop();
+        }
+        
+        function spawnRoom() {
+            game.enemies = [];
+            game.items = [];
+            game.roomCleared = false;
+            
+            const enemyCount = game.room <= 2 ? game.room : 2 + (game.room - 2);
+            for (let i = 0; i < enemyCount; i++) {
+                const types = game.room === 1 ? ['basic'] : game.room === 2 ? ['basic', 'basic'] : ['basic', 'basic', 'tough', 'fast'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                let x, y, dist;
+                let attempts = 0;
+                do {
+                    x = Math.random() * (GAME_WIDTH - 200) + 100;
+                    y = Math.random() * (GAME_HEIGHT - 200) + 100;
+                    dist = Math.sqrt((x - game.player.x) ** 2 + (y - game.player.y) ** 2);
+                    attempts++;
+                } while (dist < 300 && attempts < 50);
+                
+                game.enemies.push(new Enemy(x, y, type));
+            }
+            
+            if (Math.random() < 0.7) {
+                const weapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+                game.items.push(new Item(Math.random() * GAME_WIDTH, Math.random() * GAME_HEIGHT, 'weapon', weapon));
+            }
+            
+            if (Math.random() < 0.4) {
+                game.items.push(new Item(Math.random() * GAME_WIDTH, Math.random() * GAME_HEIGHT, 'health', { amount: 30 }));
+            }
+        }
+        
+        function showLevelUpModal() {
+            const modal = document.getElementById('level-up-modal');
+            const container = document.getElementById('skill-options');
+            container.innerHTML = '';
+            
+            const available = skillPool.filter(s => !game.player.skills.find(ps => ps.name === s.name));
+            const options = [];
+            for (let i = 0; i < 3 && available.length > 0; i++) {
+                const idx = Math.floor(Math.random() * available.length);
+                options.push(available.splice(idx, 1)[0]);
+            }
+            
+            options.forEach(skill => {
+                const div = document.createElement('div');
+                div.className = 'skill-option';
+                div.innerHTML = `<h4>${skill.name}</h4><p>${skill.effect}</p>`;
+                div.onclick = () => {
+                    game.player.skills.push({ ...skill });
+                    modal.style.display = 'none';
+                    updateHUD();
+                };
+                container.appendChild(div);
+            });
+            
+            modal.style.display = 'flex';
+        }
+        
+        function updateHUD() {
+            document.getElementById('hud-class').textContent = game.player.class;
+            document.getElementById('hud-hp').textContent = `${Math.ceil(game.player.hp)}/${game.player.maxHp}`;
+            document.getElementById('hud-level').textContent = game.player.level;
+            document.getElementById('hud-xp').textContent = `${Math.floor(game.player.xp)}/${game.player.xpToLevel}`;
+            document.getElementById('hud-weapon').textContent = game.player.weapon.name;
+            
+            const skillsDiv = document.getElementById('skills-display');
+            skillsDiv.innerHTML = '';
+            game.player.skills.forEach((skill, i) => {
+                const badge = document.createElement('span');
+                badge.className = 'skill-badge';
+                badge.textContent = `${i + 1}: ${skill.name}`;
+                skillsDiv.appendChild(badge);
+            });
+        }
+        
+        function gameLoop() {
+            if (game.state !== 'playing') return;
+            
+            game.player.update();
+            
+            game.enemies.forEach(e => e.update());
+            game.enemies = game.enemies.filter(e => {
+                if (e.hp <= 0) {
+                    game.player.gainXP(e.xpValue);
+                    createParticles(e.x, e.y, '#2B2420', 8);
+                    return false;
+                }
+                return true;
+            });
+            
+            game.items = game.items.filter(item => {
+                const dist = Math.sqrt((item.x - game.player.x) ** 2 + (item.y - game.player.y) ** 2);
+                if (dist < 25) {
+                    if (item.type === 'weapon') {
+                        game.player.weapon = { ...item.data };
+                    } else if (item.type === 'health') {
+                        game.player.hp = Math.min(game.player.maxHp, game.player.hp + item.data.amount);
+                    }
+                    updateHUD();
+                    return false;
+                }
+                return true;
+            });
+            
+            game.particles = game.particles.filter(p => {
+                p.update();
+                return p.life > 0;
+            });
+            
+            if (game.enemies.length === 0 && !game.roomCleared) {
+                game.roomCleared = true;
+                game.room++;
+                if (game.room > game.maxRooms) {
+                    endGame(true);
+                    return;
+                } else {
+                    setTimeout(() => spawnRoom(), 1000);
+                }
+            }
+            
+            if (game.player.hp <= 0) {
+                endGame(false);
+                return;
+            }
+            
+            draw();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function draw() {
+            ctx.fillStyle = '#FFF9F0';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            
+            ctx.strokeStyle = '#F5F1E8';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < GAME_WIDTH; x += TILE_SIZE) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, GAME_HEIGHT);
+                ctx.stroke();
+            }
+            for (let y = 0; y < GAME_HEIGHT; y += TILE_SIZE) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(GAME_WIDTH, y);
+                ctx.stroke();
+            }
+            
+            game.items.forEach(i => i.draw());
+            game.enemies.forEach(e => e.draw());
+            game.player.draw();
+            game.particles.forEach(p => p.draw());
+            
+            ctx.fillStyle = '#2B2420';
+            ctx.font = '16px Inconsolata, monospace';
+            ctx.fillText(`Room ${game.room}/${game.maxRooms}`, 10, 20);
+            ctx.fillText(`Enemies: ${game.enemies.length}`, 10, 40);
+        }
+        
+        function endGame(victory) {
+            game.state = 'gameover';
+            const modal = document.getElementById('game-over-modal');
+            document.getElementById('game-over-title').textContent = victory ? 'Victory!' : 'Defeated';
+            document.getElementById('game-over-text').textContent = victory 
+                ? `Congratulations! You cleared all ${game.maxRooms} rooms as a ${game.player.class} (Level ${game.player.level}).`
+                : `You fell in room ${game.room} at level ${game.player.level}. Try again!`;
+            modal.style.display = 'flex';
+        }
+        
+        document.querySelectorAll('.class-card').forEach(card => {
+            card.addEventListener('click', () => {
+                startGame(card.dataset.class);
+            });
+        });
+        
+        document.addEventListener('keydown', e => {
+            game.keys[e.key] = true;
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (game.state === 'playing') game.player.attack();
+            }
+            
+            if (e.key >= '1' && e.key <= '5') {
+                const idx = parseInt(e.key) - 1;
+                if (game.state === 'playing') game.player.useSkill(idx);
+            }
+        });
+        
+        document.addEventListener('keyup', e => {
+            game.keys[e.key] = false;
+        });
+        
+        document.querySelectorAll('.mobile-btn[data-dir]').forEach(btn => {
+            btn.addEventListener('touchstart', e => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                if (dir === 'up') game.keys['w'] = true;
+                if (dir === 'down') game.keys['s'] = true;
+                if (dir === 'left') game.keys['a'] = true;
+                if (dir === 'right') game.keys['d'] = true;
+            });
+            btn.addEventListener('touchend', e => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                if (dir === 'up') game.keys['w'] = false;
+                if (dir === 'down') game.keys['s'] = false;
+                if (dir === 'left') game.keys['a'] = false;
+                if (dir === 'right') game.keys['d'] = false;
+            });
+        });
+        
+        document.querySelector('.mobile-btn[data-action="attack"]').addEventListener('click', () => {
+            if (game.state === 'playing') game.player.attack();
+        });
+        
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            document.getElementById('game-over-modal').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('title-screen').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
