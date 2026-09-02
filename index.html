@@ -718,6 +718,8 @@
                 this.xpValue = type === 'basic' ? 25 : type === 'tough' ? 60 : 50;
                 this.stunUntil = 0;
                 this.slowedUntil = 0;
+                this.lastAttack = 0;
+                this.attackCooldown = type === 'fast' ? 800 : 1200;
             }
             
             update() {
@@ -735,10 +737,11 @@
                     this.y += (dy / dist) * speed;
                 }
                 
-                if (dist < 25) {
+                if (dist < 25 && Date.now() - this.lastAttack > this.attackCooldown) {
                     const block = game.player.activeEffects.find(e => e.type === 'block');
                     const damage = block ? this.damage * (1 - block.value) : this.damage;
-                    game.player.hp -= damage * 0.016;
+                    game.player.hp -= damage;
+                    this.lastAttack = Date.now();
                 }
             }
             
